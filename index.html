@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Simulador de Consulta Clínica</title>
+  <meta name="description" content="Novela visual educativa: atiende casos clínicos desde el punto de vista del médico, con checklist al estilo de la prueba práctica del Revalida.">
+  <meta name="theme-color" content="#0f1b2d">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <div id="app">
+    <section class="pantalla activa" id="menu"></section>
+    <section class="pantalla" id="juego"></section>
+    <section class="pantalla" id="resultado"></section>
+  </div>
+  <noscript>Este simulador necesita JavaScript activado.</noscript>
+
+  <!-- Casos clínicos (agrega aquí nuevos archivos de caso) -->
+  <script src="js/casos/cirugia-apendicitis.js"></script>
+  <script src="js/proximos.js"></script>
+  <!-- Motor -->
+  <script src="js/motor.js"></script>
+</body>
+</html>
