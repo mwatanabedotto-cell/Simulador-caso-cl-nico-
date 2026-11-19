@@ -4,6 +4,8 @@ Novela visual educativa con **ilustraciones estilo cómic** en la que juegas **d
 
 ## Fases de la consulta
 
+0. **Ubicación de la paciente**: con los datos del triaje decides dónde atenderla (box de emergencia, consultorio, sala de reanimación o sala de espera). La escena de la entrevista sigue tu decisión.
+
 1. **Anamnesis**: presentación, motivo de consulta, enfermedad actual, antecedentes y hábitos
 2. **Exploración física**: en el box de examen, con **vista aérea de la camilla**. Cada maniobra se realiza en su **posición anatómica** (bipedestación, sedestación, decúbito supino, lateral izquierdo, prono y ginecológica), con un zoom que marca el punto exacto (McBurney, Rovsing, Murphy, Giordano…)
 3. **Laboratorio y gabinete**: llenas una **hoja de solicitud** de papel (marcas los exámenes, firmas y envías) y recibes los informes
@@ -57,7 +59,7 @@ js/casos/cirugia-apendicitis.js  ← datos del caso
 
 Crea `js/casos/<id>.js` que haga `window.CASOS.push({...})` (usa el caso de apendicitis como plantilla) y agrégalo en `index.html`. Campos principales:
 
-- `paciente` (con su paleta en `paciente.arte`), `personajes`, `escenario`, `introLineas`, `hcSecciones`, `referencias`
+- `paciente` (con su paleta en `paciente.arte`), `ubicacion` (pregunta inicial, `opciones` con `lugar: 'box' | 'consultorio'` y líneas de `llegada`), `personajes`, `escenario`, `introLineas`, `hcSecciones`, `referencias`
 - `fases[]` de dos tipos:
   - `tipo: 'acciones'` → `grupos[]` con `opciones[]` (`id`, `texto`, `tiempo`, `flags`, `hc`, `lineas`, `efecto`, `estabilidad`). Un grupo con `requiere: 'flag'` se desbloquea con ese flag.
   - `tipo: 'solicitud'` → hoja de solicitud con `secciones[]` de `opciones[]` (los exámenes de una hoja se procesan en paralelo).

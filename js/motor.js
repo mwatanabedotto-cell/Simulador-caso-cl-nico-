@@ -55,7 +55,9 @@
   function lugarActual() {
     if (S.lugarFinal) return S.lugarFinal;
     const f = caso.fases[S.fase];
-    return (f && f.escena) || 'consultorio';
+    if (f && f.escena) return f.escena;
+    // fases de conversación: donde el/la jugador/a decidió ubicar a la paciente
+    return S.ubicacion === 'box' ? 'box' : 'consultorio';
   }
 
   // ============================================================ PANTALLAS
@@ -240,9 +242,10 @@
       lugar: lugarActual(), pose: S.pos, variante: v && v.variante, accesorio: v && v.accesorio, marca: v && v.marca,
       pal: palPaciente(), expr: S.expr, hora: [Math.floor(tot / 60) % 24, tot % 60],
       suero: !!S.flags.i_hidratacion, // la enfermera nunca se dibuja: solo habla fuera de pantalla
+      sinPaciente: S.fase === -1 && !S.ubicacion,
     });
     const box = lugarActual() === 'box';
-    $('#escChip').hidden = !box;
+    $('#escChip').hidden = !(box && enExploracion());
     $('#escChip').innerHTML = `<span>🛏 ${esc(nombrePos(S.pos))}</span>${v && v.titulo ? `<span class="chip-man">✋ ${esc(v.titulo)}</span>` : ''}`;
     // zoom de la maniobra
     detenerZoom();
@@ -420,6 +423,30 @@
     const p = $('#panel');
     p.classList.toggle('bloqueado', D.ocupado);
 
+    if (S.fase === -1 && caso.ubicacion && !S.ubicacion) {
+      const e = caso.escenario, u = caso.ubicacion;
+      p.innerHTML = `
+        <div class="pnl-cab"><span class="pnl-fase">Estación</span><h2>${esc(e.lugar)}</h2></div>
+        <div class="pnl-cuerpo">
+          <div class="tarjeta-escenario">
+            <p>${fmt(e.texto)}</p>
+            <h3>Tareas del candidato</h3>
+            <ol>${e.tareas.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
+            ${S.modo === 'examen' ? `<p class="aviso">⏱ Modo examen: tienes ${Math.round((caso.duracionExamen || 600) / 60)} minutos reales.</p>` : ''}
+          </div>
+          <h3 class="paso-preg">${fmt(u.pregunta)}</h3>
+          <form class="paso-form" id="ubicForm">${u.opciones.map((o) => `<label class="sel"><input type="radio" name="ubic" value="${o.id}"><span>${fmt(o.texto)}</span></label>`).join('')}</form>
+        </div>
+        <div class="pnl-pie"><button class="btn btn-prim btn-ancho" id="btnUbicar" disabled>Ubicar a la paciente ▶</button></div>`;
+      const form = $('#ubicForm'), btn = $('#btnUbicar');
+      form.addEventListener('change', () => { btn.disabled = !form.querySelector('input:checked'); });
+      btn.addEventListener('click', () => {
+        if (D.ocupado) return;
+        const id = form.querySelector('input:checked').value;
+        elegirUbicacion(u.opciones.find((o) => o.id === id));
+      });
+      return;
+    }
     if (S.fase === -1) {
       const e = caso.escenario;
       p.innerHTML = `
@@ -589,7 +616,7 @@
         <div class="hoja-datos">
           <span>Paciente: <b>${esc(pac.nombreCompleto || pac.nombre)}</b></span>
           <span>Edad: <b>${pac.edad} años</b></span><span>Sexo: <b>${esc(pac.sexo || '')}</b></span>
-          <span>Fecha/hora: <b>${pad(Math.floor(tot / 60) % 24)}:${pad(tot % 60)}</b></span><span>${esc(fase.ubicacion || '')}</span>
+          <span>Fecha/hora: <b>${pad(Math.floor(tot / 60) % 24)}:${pad(tot % 60)}</b></span><span>Ubicación: <b>${esc(S.ubicacion === 'consultorio' ? 'Consultorio' : (fase.ubicacion || 'Box de emergencia'))}</b></span>
         </div>
         <label class="hoja-dx">Diagnóstico presuntivo:<input id="hojaDx" type="text" maxlength="90" autocomplete="off" placeholder="(opcional)"></label>
         <div class="hoja-grid">${fase.secciones.map((s) => `<fieldset><legend>${esc(s.titulo)}</legend>${s.opciones.map((o) => `
@@ -655,6 +682,16 @@
     decir(lineas, trasAccion);
   }
 
+  // Decisión inicial: dónde ubicar a la paciente (consultorio, box de emergencia…)
+  function elegirUbicacion(op) {
+    S.ubicacion = op.lugar;
+    const lineas = aplicar(op).concat((caso.ubicacion.llegada || {})[op.lugar] || []);
+    guardar();
+    actualizarEscena();
+    renderPanel();
+    decir(lineas, () => irAFase(0));
+  }
+
   function irAFase(n) {
     if (n >= caso.fases.length) return terminar('completo');
     S.fase = n;
@@ -667,7 +704,9 @@
     renderPanel();
     if (f.intro && !S.faseIntroVista[f.id]) {
       S.faseIntroVista[f.id] = true;
-      decir(f.intro, trasAccion);
+      const intro = typeof f.intro === 'function' ? f.intro(S, api) : f.intro;
+      actualizarEscena();
+      decir(intro, trasAccion);
     }
   }
 
@@ -739,8 +778,8 @@
     };
     D.cola = []; D.ocupado = false;
     S.expr = fin.tipo === 'bueno' ? 'alivio' : fin.tipo === 'malo' ? 'dolor' : 'preocupada';
-    S.pos = 'supino';
-    S.lugarFinal = fin.tipo === 'bueno' ? 'consultorio' : 'box';
+    S.pos = fin.tipo === 'bueno' ? 'sedestacion' : 'supino';
+    S.lugarFinal = fin.tipo === 'bueno' && S.ubicacion !== 'box' ? 'consultorio' : 'box';
     S.vista = null;
     actualizarEscena();
     $('#panel').innerHTML = '<div class="pnl-cab"><span class="pnl-fase">Desenlace</span><h2>Evolución de la paciente</h2></div><div class="pnl-cuerpo"><p class="pista">Haz clic en el diálogo para ver tu evaluación.</p></div>';

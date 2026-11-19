@@ -51,6 +51,7 @@
       texto:
         'Mujer de 24 años acude a urgencias por dolor abdominal. En el triaje fue clasificada como **amarillo (urgente)**. Usted es el/la médico/a de guardia.',
       tareas: [
+        'Decidir dónde ubicar y atender a la paciente.',
         'Realizar la anamnesis dirigida.',
         'Realizar el examen físico pertinente.',
         'Solicitar e interpretar los exámenes complementarios.',
@@ -60,11 +61,41 @@
     },
 
     introLineas: [
-      E('Doc, buenas tardes. En el box 3 hay una paciente con dolor abdominal; en el triaje la clasificamos como amarillo.'),
-      E('Se llama Laura y tiene 24 años. Está bastante adolorida.'),
-      N('Entras al box. Laura está sentada en la camilla, encorvada, con una mano sobre el lado derecho del abdomen.'),
-      P('Doctor/a… menos mal que llegó. Me duele mucho.', 'dolor'),
+      E('Doc, buenas tardes. Llegó una paciente con dolor abdominal: se llama Laura y tiene 24 años.'),
+      E('En el triaje: FC 104, temperatura 38,1 °C, PA 118/76, saturación 98 % y dolor 8 sobre 10. La clasifiqué como **amarillo (urgente)**.'),
+      E('¿Dónde la ubico, Doc?'),
     ],
+
+    // Decisión inicial: dónde ubicar y atender a la paciente
+    ubicacion: {
+      pregunta: '¿Dónde vas a ubicar y atender a Laura?',
+      opciones: [
+        {
+          id: 'u_box', texto: 'Box de emergencia (camilla, monitor y acceso venoso)', lugar: 'box', tiempo: 2, flags: ['ubic_ok'],
+          hc: ['Plan', 'Ubicación: box de emergencia (triaje amarillo).'],
+          lineas: [E('Perfecto, Doc. La paso al box 3 y le dejo el monitor listo.')],
+        },
+        {
+          id: 'u_cons', texto: 'Consultorio de atención ambulatoria', lugar: 'consultorio', tiempo: 2, flags: ['ubic_cons'],
+          hc: ['Plan', 'Ubicación: consultorio ambulatorio.'],
+          lineas: [E('¿Al consultorio, Doc? Tiene fiebre, está taquicárdica y con mucho dolor… Bueno, se la traigo.')],
+        },
+        {
+          id: 'u_rcp', texto: 'Sala de reanimación (shock room)', lugar: 'box', tiempo: 5, flags: ['ubic_reanimacion'],
+          hc: ['Plan', 'Ubicación: se solicitó sala de reanimación; queda en box de emergencia.'],
+          lineas: [E('Doc, la sala de reanimación es para pacientes críticos (rojos) y ahora está ocupada con un politraumatizado. La dejo en el box 3.')],
+        },
+        {
+          id: 'u_esp', texto: 'Que espere en la sala de espera hasta que se libere un lugar', lugar: 'box', tiempo: 60, estabilidad: -10, flags: ['ubic_espera'],
+          hc: ['Plan', 'Esperó 1 h en la sala de espera antes de ser atendida.'],
+          lineas: [N('Laura espera una hora en la sala de espera, doblada de dolor…'), E('¡Doc! Laura vomitó en la sala de espera y está más pálida. La paso ya al box 3.')],
+        },
+      ],
+      llegada: {
+        box: [N('Entras al box de emergencia. Laura está sentada en la camilla, encorvada, con una mano sobre el lado derecho del abdomen.'), P('Doctor/a… menos mal que llegó. Me duele mucho.', 'dolor')],
+        consultorio: [N('Laura entra al consultorio caminando encorvada y se sienta frente a tu escritorio, con una mano sobre el lado derecho del abdomen.'), P('Doctor/a… me duele mucho.', 'dolor')],
+      },
+    },
 
     hcSecciones: [
       'Identificación', 'Motivo de consulta', 'Enfermedad actual', 'Antecedentes',
@@ -80,6 +111,7 @@
       sabiston: 'Townsend CM, Beauchamp RD, Evers BM, Mattox KL. Sabiston Textbook of Surgery. 21st ed. Elsevier; 2022. Cap. "The Appendix".',
       porto: 'Porto CC. Semiologia Médica. 8ª ed. Rio de Janeiro: Guanabara Koogan; 2019.',
       bratzler: 'Bratzler DW, Dellinger EP, Olsen KM, et al. Clinical practice guidelines for antimicrobial prophylaxis in surgery. Am J Health Syst Pharm. 2013;70(3):195-283.',
+      manchester: 'Mackway-Jones K, Marsden J, Windle J, editores. Emergency Triage: Manchester Triage Group. 3rd ed. Chichester: Wiley-Blackwell; 2014.',
       oms: 'Organización Mundial de la Salud. Directrices de la OMS sobre higiene de las manos en la atención sanitaria (5 momentos). Ginebra: OMS; 2009.',
     },
 
@@ -269,7 +301,14 @@
         posiciones: true,
         posInicial: 'sedestacion',
         ayuda: 'Elige qué examinar y en qué orden. Cada maniobra se hace en una posición anatómica; en el abdomen, el orden importa.',
-        intro: [N('Terminas la entrevista y acompañas a Laura a la camilla del box de examen.'), P('¿Me siento aquí?', 'preocupada')],
+        // Si la paciente estaba en el consultorio, hay que trasladarla al box (consume tiempo)
+        intro: (s) => {
+          if (s.ubicacion === 'consultorio') {
+            s.ubicacion = 'box'; s.tiempo += 10; s.flags.ubic_traslado = true;
+            return [N('El consultorio no tiene monitor, oxígeno ni camilla adecuada para una paciente febril y taquicárdica con abdomen agudo.'), E('Doc, la llevo al box de emergencia para examinarla y monitorizarla… perdimos unos minutos.'), P('¿Otra vez caminar…? Ay…', 'dolor')];
+          }
+          return [N('Terminas la entrevista. Laura sigue en la camilla del box.'), P('¿Me acuesto aquí?', 'preocupada')];
+        },
         grupos: [
           {
             titulo: 'Preparación',
@@ -767,6 +806,11 @@
     // A = n.º de subítems para «Adecuado», P = para «Parcial». eval(flags) permite reglas propias.
     checklist: [
       {
+        id: 'c0', texto: 'Ubica a la paciente en el lugar adecuado (box de emergencia)', peso: 0.5,
+        eval: (f) => (f.ubic_ok ? 'A' : f.ubic_reanimacion ? 'P' : 'I'),
+        explicacion: 'Paciente amarilla (urgente) en el triaje de Manchester, con fiebre, taquicardia y dolor intenso: debe ir a un box de emergencia con camilla, monitorización y acceso venoso. El consultorio ambulatorio no tiene esos recursos; la sala de reanimación se reserva para pacientes críticos (rojos); y para un paciente amarillo la espera recomendada es de hasta 60 minutos, que ya consumió en el triaje.', refs: ['manchester'],
+      },
+      {
         id: 'c1', texto: 'Se presenta, identifica a la paciente e higieniza las manos', peso: 0.5, A: 3, P: 2,
         sub: [{ flag: 'presentacion', texto: 'Se presenta' }, { flag: 'identifica', texto: 'Identifica a la paciente' }, { flag: 'higiene', texto: 'Higiene de manos' }],
         explicacion: 'La higiene de manos antes del contacto con el paciente es el 1.er de los «5 momentos» de la OMS. La presentación y la identificación son ítems fijos del PEP.', refs: ['oms'],
@@ -860,6 +904,9 @@
     ],
 
     observaciones: [
+      { flag: 'ubic_cons', texto: 'Atender en el consultorio ambulatorio a una paciente amarilla con signos de abdomen agudo obligó a trasladarla después al box (más tiempo y sin monitorización durante la entrevista).', ref: 'manchester' },
+      { flag: 'ubic_reanimacion', texto: 'Sobretriaje: la sala de reanimación es para pacientes rojos (riesgo vital inmediato).', ref: 'manchester' },
+      { flag: 'ubic_espera', texto: 'Dejarla en la sala de espera retrasó una hora la atención de una paciente urgente y empeoró su estado.', ref: 'manchester' },
       { flag: 'gin_sin_chaperona', texto: 'Examen ginecológico sin acompañante: se recomienda la presencia de un/a profesional durante los exámenes íntimos.' },
       { flag: 'i_sin_analgesia', texto: 'Retrasar la analgesia es un mito: no enmascara el diagnóstico y prolonga el sufrimiento de la paciente.', ref: 'cochrane' },
       { flag: 'i_sng_innecesaria', texto: 'La sonda nasogástrica no está indicada de rutina en la apendicitis no complicada.' },

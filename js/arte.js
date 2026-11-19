@@ -479,7 +479,7 @@
     g.clearRect(0, 0, W, H);
     if (o.lugar === 'consultorio') {
       fondoConsultorio(g, o);
-      conTinta(g, (d) => busto(d, o.pal, o.expr || 'neutral'), 1.2);
+      if (!o.sinPaciente) conTinta(g, (d) => busto(d, o.pal, o.expr || 'neutral'), 1.2);
       escritorio(g);
       return;
     }
