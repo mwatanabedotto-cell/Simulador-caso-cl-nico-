@@ -1,6 +1,6 @@
 /*
- * Simulador de Consulta Clínica — motor de novela visual (pixel art)
- * Sin dependencias. Gráficos en js/pixel.js. Casos en window.CASOS (js/casos/).
+ * Simulador de Consulta Clínica — motor de novela visual (estilo cómic)
+ * Sin dependencias. Gráficos en js/arte.js. Casos en window.CASOS (js/casos/).
  */
 (function () {
   'use strict';
@@ -13,8 +13,8 @@
   const pad = (n) => String(n).padStart(2, '0');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const dur = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ' ' + (m % 60) + ' min' : ''}` : `${m} min`);
-  const PX = () => window.Pixel;
-  const nombrePos = (k) => (PX().POSES[k] || {}).nombre || k;
+  const ARTE = () => window.Arte;
+  const nombrePos = (k) => (ARTE().POSES[k] || {}).nombre || k;
 
   // ------------------------------------------------------------ almacenamiento
   const CLAVE = 'simclin:v1';
@@ -50,7 +50,7 @@
     s.examenesPos = s.examenesPos || [];
     return s;
   }
-  const palPaciente = () => ({ coleta: true, manoAbd: true, ...(caso.paciente.pixel || {}) });
+  const palPaciente = () => ({ coleta: true, manoAbd: true, ...(caso.paciente.arte || {}) });
   // Lugar de la escena: consultorio (conversación) o box (examen físico)
   function lugarActual() {
     if (S.lugarFinal) return S.lugarFinal;
@@ -73,7 +73,7 @@
     $('#menu').innerHTML = `
       <div class="menu-wrap">
         <header class="menu-hero">
-          <canvas id="cvHero" class="px" width="320" height="180" aria-hidden="true"></canvas>
+          <canvas id="cvHero" width="320" height="180" aria-hidden="true"></canvas>
           <div class="hero-txt">
             <h1>Simulador de Consulta Clínica</h1>
             <p>Atiende pacientes desde los ojos del médico: anamnesis, exploración física en cada posición anatómica, hoja de solicitud de exámenes, diagnóstico y decisiones. Al final recibes un checklist al estilo de la prueba práctica del Revalida.</p>
@@ -111,9 +111,9 @@
         <footer class="menu-pie">Simulador educativo. No reemplaza el juicio clínico ni los protocolos locales.</footer>
       </div>`;
     const c0 = casos[0];
-    if (c0 && PX()) {
+    if (c0 && ARTE()) {
       caso = c0;
-      PX().escena($('#cvHero'), { lugar: 'consultorio', pal: palPaciente(), expr: 'preocupada', hora: c0.horaLlegada });
+      ARTE().escena($('#cvHero'), { lugar: 'consultorio', pal: palPaciente(), expr: 'preocupada', hora: c0.horaLlegada });
     }
     $('#btnAtlas').addEventListener('click', abrirAtlas);
     $('#menu').querySelectorAll('[data-jugar]').forEach((b) => b.addEventListener('click', () => elegirModo(b.dataset.jugar)));
@@ -126,14 +126,14 @@
     (window.CASOS || []).forEach((c) => c.fases.forEach((f) => (f.grupos || []).forEach((g) => g.opciones.forEach((o) => {
       if (o.posicion) (usos[o.posicion] = usos[o.posicion] || []).push(plano(o.texto));
     }))));
-    const P = PX().POSES;
+    const P = ARTE().POSES;
     modal(`<h2>🧍 Atlas de posiciones anatómicas</h2>
       <div class="atlas">${Object.keys(P).map((k) => `<figure class="atlas-item">
-        <canvas class="px" width="320" height="180" data-atlas="${k}"></canvas>
+        <canvas width="320" height="180" data-atlas="${k}"></canvas>
         <figcaption><strong>${esc(P[k].nombre)}</strong><span>${esc(P[k].desc)}</span>
         ${usos[k] ? `<em>En el caso: ${usos[k].map(esc).join(' · ')}</em>` : ''}</figcaption></figure>`).join('')}</div>`, (box) => {
       const pal = palPaciente();
-      box.querySelectorAll('[data-atlas]').forEach((cv) => PX().escena(cv, { lugar: 'box', pose: cv.dataset.atlas, pal: { ...pal, manoAbd: false }, expr: 'neutral' }));
+      box.querySelectorAll('[data-atlas]').forEach((cv) => ARTE().escena(cv, { lugar: 'box', pose: cv.dataset.atlas, pal: { ...pal, manoAbd: false }, expr: 'neutral' }));
     }, 'modal-ancho');
   }
 
@@ -194,13 +194,13 @@
       <main class="stage">
         <section class="escena-col">
           <div class="escena" id="escena">
-            <canvas id="cvEscena" class="px" width="320" height="180" aria-label="Escena del box de urgencias"></canvas>
+            <canvas id="cvEscena" width="320" height="180" aria-label="Escena del box de urgencias"></canvas>
             <div class="esc-chip" id="escChip"></div>
-            <figure class="zoom" id="zoom" hidden><canvas id="cvZoom" class="px" width="64" height="48"></canvas><figcaption id="zoomTxt"></figcaption></figure>
+            <figure class="zoom" id="zoom" hidden><canvas id="cvZoom" width="64" height="48"></canvas><figcaption id="zoomTxt"></figcaption></figure>
             <div class="monitor" id="monitor" hidden></div>
           </div>
           <div class="dialogo" id="dialogo" tabindex="0" role="button" aria-live="polite">
-            <canvas id="cvRetrato" class="px retrato" width="64" height="64" aria-hidden="true"></canvas>
+            <canvas id="cvRetrato" class="retrato" width="64" height="64" aria-hidden="true"></canvas>
             <div class="dlg-cuerpo">
               <div class="dlg-nombre" id="dlgNombre"></div>
               <div class="dlg-texto" id="dlgTexto"></div>
@@ -222,7 +222,7 @@
     $('#velo').addEventListener('click', cerrarHC);
     $('#dialogo').addEventListener('click', avanzarDialogo);
     mostrar('juego');
-    PX().retrato($('#cvRetrato'), 'narrador', 'neutral', palPaciente());
+    ARTE().retrato($('#cvRetrato'), 'narrador', 'neutral', palPaciente());
     actualizarEscena();
     actualizarTopbar();
     iniciarTimer();
@@ -236,7 +236,7 @@
     const v = S.vista && S.vista.pose === S.pos ? S.vista : null;
     const [h0, m0] = caso.horaLlegada || [8, 0];
     const tot = h0 * 60 + m0 + S.tiempo;
-    PX().escena(cv, {
+    ARTE().escena(cv, {
       lugar: lugarActual(), pose: S.pos, variante: v && v.variante, accesorio: v && v.accesorio, marca: v && v.marca,
       pal: palPaciente(), expr: S.expr, hora: [Math.floor(tot / 60) % 24, tot % 60],
       suero: !!S.flags.i_hidratacion, // la enfermera nunca se dibuja: solo habla fuera de pantalla
@@ -251,7 +251,7 @@
       z.hidden = false;
       $('#zoomTxt').textContent = v.zoomTxt || '';
       let on = true;
-      const dib = () => { PX().zoom($('#cvZoom'), { tipo: v.zoom, zona: v.zona, pal: palPaciente() }, on); on = !on; };
+      const dib = () => { ARTE().zoom($('#cvZoom'), { tipo: v.zoom, zona: v.zona, pal: palPaciente() }, on); on = !on; };
       dib();
       zoomId = setInterval(() => { if (!$('#cvZoom')) return detenerZoom(); dib(); }, 480);
     } else z.hidden = true;
@@ -344,7 +344,7 @@
     $('#dialogo').className = 'dialogo q-' + pj.clase;
     if (l.expr && l.expr !== S.expr) { S.expr = l.expr; actualizarEscena(); }
     const ret = $('#cvRetrato');
-    PX().retrato(ret, l.quien, S.expr, palPaciente());
+    ARTE().retrato(ret, l.quien, S.expr, palPaciente());
     if (l.quien === 'paciente' && (S.expr === 'dolor' || S.expr === 'sorpresa')) { ret.classList.remove('sacudir'); void ret.offsetWidth; ret.classList.add('sacudir'); }
     const rep = $('#dlgReporte');
     if (l.reporte) { rep.hidden = false; rep.innerHTML = htmlReporte(l.reporte); } else { rep.hidden = true; rep.innerHTML = ''; }
@@ -451,12 +451,12 @@
       const grupos = fase.grupos.filter((g) => !g.requiere || S.flags[g.requiere]);
       const ocultos = fase.grupos.length - grupos.length;
       const usadosFase = fase.grupos.reduce((a, g) => a + g.opciones.filter((o) => S.usados[o.id]).length, 0);
-      const P = PX().POSES;
+      const P = ARTE().POSES;
       const posHTML = fase.posiciones ? `<div class="poses-box">
           <div class="poses-cab"><span>Posición de la paciente</span>
             ${S.modo === 'estudio' ? `<label class="toggle"><input type="checkbox" id="tgManual" ${S.posManual ? 'checked' : ''}><span>Desafío</span></label>` : '<span class="chip">Desafío</span>'}
           </div>
-          <div class="poses">${Object.keys(P).map((k) => `<button class="pose ${S.pos === k ? 'activa' : ''}" data-pose="${k}" title="${esc(P[k].nombre)}: ${esc(P[k].desc)}"><canvas class="px" width="160" height="90" data-th="${k}"></canvas><span>${esc(P[k].corto)}</span></button>`).join('')}</div>
+          <div class="poses">${Object.keys(P).map((k) => `<button class="pose ${S.pos === k ? 'activa' : ''}" data-pose="${k}" title="${esc(P[k].nombre)}: ${esc(P[k].desc)}"><canvas width="160" height="90" data-th="${k}"></canvas><span>${esc(P[k].corto)}</span></button>`).join('')}</div>
           <p class="pista">${S.posManual ? '🎯 Coloca tú a la paciente en la posición correcta antes de cada maniobra.' : '🤖 La paciente se coloca sola en la posición de cada maniobra. Activa «Desafío» para hacerlo tú.'}</p>
         </div>` : '';
       p.innerHTML = cab + `<div class="pnl-cuerpo">${posHTML}
@@ -471,7 +471,7 @@
       }));
       if (fase.posiciones) {
         const pal = { ...palPaciente(), manoAbd: false };
-        p.querySelectorAll('[data-th]').forEach((cv) => PX().miniatura(cv, cv.dataset.th, pal, S.expr));
+        p.querySelectorAll('[data-th]').forEach((cv) => ARTE().miniatura(cv, cv.dataset.th, pal, S.expr));
         p.querySelectorAll('[data-pose]').forEach((b) => b.addEventListener('click', () => cambiarPos(b.dataset.pose)));
         const tg = $('#tgManual');
         if (tg) tg.addEventListener('change', () => { S.posManual = tg.checked; guardar(); renderPanel(); });
@@ -760,7 +760,7 @@
     const extra = caso.extraResultado ? caso.extraResultado(S) : null;
     const clase = r.nota >= 7 ? 'aprob' : r.nota >= 5 ? 'limite' : 'reprob';
     const min = Math.floor(S.tiempo / 60), seg = S.tiempo % 60;
-    const P = PX().POSES;
+    const P = ARTE().POSES;
     // Tabla de exámenes y posiciones (todas las maniobras del caso)
     const maniobras = [];
     caso.fases.forEach((f) => (f.grupos || []).forEach((g) => g.opciones.forEach((o) => { if (o.posicion) maniobras.push(o); })));

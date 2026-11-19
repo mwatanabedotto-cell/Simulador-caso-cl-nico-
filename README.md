@@ -1,6 +1,6 @@
 # 🩺 Simulador de Consulta Clínica
 
-Novela visual educativa en **pixel art** en la que juegas **desde el punto de vista del médico**. Atiendes a un paciente siguiendo todos los pasos de la consulta, y al final recibes una evaluación con un **checklist al estilo de la prueba práctica (PEP) del Revalida**.
+Novela visual educativa con **ilustraciones estilo cómic** en la que juegas **desde el punto de vista del médico**. Atiendes a un paciente siguiendo todos los pasos de la consulta, y al final recibes una evaluación con un **checklist al estilo de la prueba práctica (PEP) del Revalida**.
 
 ## Fases de la consulta
 
@@ -13,7 +13,7 @@ Novela visual educativa en **pixel art** en la que juegas **desde el punto de vi
 
 ## Mecánicas
 
-- **Escenas pixel art**: consultorio visto desde tu escritorio (paredes celeste claro, reloj digital con la hora clínica) y box de examen visto desde arriba; retratos con expresiones (dolor, preocupación, alivio, sorpresa).
+- **Ilustración estilo cómic**: contornos de tinta, colores planos vibrantes, tramas de puntos y fondos claros. Consultorio visto desde tu escritorio y box de examen; retratos muy expresivos (dolor, preocupación, alivio, sorpresa). La interfaz imita las viñetas y globos de un cómic.
 - **Posiciones anatómicas**: en modo Estudio la paciente se coloca sola en cada maniobra; en modo Examen (o activando «Desafío») tú eliges la posición y los errores cuentan en el checklist. En el menú hay un **Atlas de posiciones**.
 
 - **Reloj clínico**: cada acción consume minutos. Si demoras demasiado o tomas decisiones peligrosas, el paciente empeora y aparecen **finales alternativos**.
@@ -47,7 +47,7 @@ Novela visual educativa en **pixel art** en la que juegas **desde el punto de vi
 ```
 index.html
 css/estilos.css
-js/pixel.js                      ← gráficos pixel art (escenas, posiciones, retratos, zoom)
+js/arte.js                       ← ilustraciones estilo cómic (escenas, posiciones, retratos, zoom)
 js/motor.js                      ← motor de novela visual (genérico)
 js/proximos.js                   ← tarjetas "Próximamente"
 js/casos/cirugia-apendicitis.js  ← datos del caso
@@ -57,12 +57,12 @@ js/casos/cirugia-apendicitis.js  ← datos del caso
 
 Crea `js/casos/<id>.js` que haga `window.CASOS.push({...})` (usa el caso de apendicitis como plantilla) y agrégalo en `index.html`. Campos principales:
 
-- `paciente`, `personajes`, `escenario`, `introLineas`, `hcSecciones`, `referencias`
+- `paciente` (con su paleta en `paciente.arte`), `personajes`, `escenario`, `introLineas`, `hcSecciones`, `referencias`
 - `fases[]` de dos tipos:
   - `tipo: 'acciones'` → `grupos[]` con `opciones[]` (`id`, `texto`, `tiempo`, `flags`, `hc`, `lineas`, `efecto`, `estabilidad`). Un grupo con `requiere: 'flag'` se desbloquea con ese flag.
   - `tipo: 'solicitud'` → hoja de solicitud con `secciones[]` de `opciones[]` (los exámenes de una hoja se procesan en paralelo).
   - Las posiciones acostadas se ven desde arriba (vista aérea de la camilla); sentada y de pie se ven con la camilla de lado y la paciente de frente al médico, con la mano del médico en primera persona.
-  - En exploración, cada opción puede tener `posicion` (clave de `Pixel.POSES`) y `vista` (`accesorio`, `marca`, `variante`, `zoom`, `zona`, `zoomTxt`). La fase usa `escena: 'box'` y `posiciones: true`.
+  - En exploración, cada opción puede tener `posicion` (clave de `Arte.POSES`) y `vista` (`accesorio`, `marca`, `variante`, `zoom`, `zona`, `zoomTxt`). La fase usa `escena: 'box'` y `posiciones: true`.
   - `tipo: 'pasos'` → `pasos[]` de `tipo: 'unica' | 'multiple'`, con `opciones[]` y, opcionalmente, `saltarSi` y `alConfirmar`.
 - Líneas de diálogo: `['paciente' | 'medico' | 'enfermera' | 'narrador', 'texto', 'expresión']`. Expresiones: `neutral`, `dolor`, `preocupada`, `alivio`, `sorpresa`. Para informes de laboratorio o imagen se usa `{ quien, texto, reporte: { titulo, filas | texto } }`.
 - `progresion` (evolución por tiempo), `desenlace(estado)`, `checklist[]`, `criticos[]`, `observaciones[]` y `extraResultado`.

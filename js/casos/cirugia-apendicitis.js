@@ -29,12 +29,12 @@
       sexo: 'Femenino',
       corto: 'Laura',
       edad: 24,
-      // paleta pixel art (bata = ropa en el box; suéter = ropa en el consultorio)
-      pixel: {
-        piel: '#e2b391', pielD: '#c8916f', pielL: '#f0c9a8', pielDD: '#a8735a',
-        pelo: '#3b2418', peloD: '#24150d', peloL: '#5a3a26', ojos: '#4a2f1f',
-        ropa: '#8fb3c4', ropaD: '#6f93a4', zapato: '#3d4f63',
-        sueter: '#3d6466', sueterD: '#2f4f51', sueterL: '#4b7779', cuello: '#d8cfbd',
+      // paleta de la ilustración (bata = ropa en el box; suéter = ropa en el consultorio)
+      arte: {
+        piel: '#f6c7a1', pielD: '#e0a27c', pielL: '#ffe0c7', pielDD: '#c9845e',
+        pelo: '#5a3524', peloD: '#2f1b12', peloL: '#7a4a32', ojos: '#6b3e1f',
+        ropa: '#6ec6f0', ropaD: '#3fa3d6', zapato: '#34495e',
+        sueter: '#16a085', sueterD: '#0e7a64', sueterL: '#1fc2a0', cuello: '#ffffff',
       },
     },
     personajes: {
