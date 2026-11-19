@@ -25,9 +25,17 @@
 
     paciente: {
       nombre: 'Laura Méndez',
+      nombreCompleto: 'Laura Méndez Ortiz',
+      sexo: 'Femenino',
       corto: 'Laura',
       edad: 24,
-      avatar: { piel: '#e8b892', sombra: '#d39a74', pelo: '#3a2418', ojos: '#4a2f1f', bata: '#9cc7e0', peinado: 'coleta' },
+      // paleta pixel art (bata = ropa en el box; suéter = ropa en el consultorio)
+      pixel: {
+        piel: '#e2b391', pielD: '#c8916f', pielL: '#f0c9a8', pielDD: '#a8735a',
+        pelo: '#3b2418', peloD: '#24150d', peloL: '#5a3a26', ojos: '#4a2f1f',
+        ropa: '#8fb3c4', ropaD: '#6f93a4', zapato: '#3d4f63',
+        sueter: '#3d6466', sueterD: '#2f4f51', sueterL: '#4b7779', cuello: '#d8cfbd',
+      },
     },
     personajes: {
       paciente: { nombre: 'Laura', clase: 'pac' },
@@ -36,6 +44,7 @@
       narrador: { nombre: '', clase: 'nar' },
     },
     exprInicial: 'dolor',
+    posInicial: 'sedestacion',
 
     escenario: {
       lugar: 'Servicio de Urgencias — Hospital General',
@@ -256,8 +265,11 @@
         id: 'exploracion',
         titulo: 'Exploración física',
         tipo: 'acciones',
-        ayuda: 'Elige qué examinar y en qué orden. En el abdomen, el orden de las maniobras importa.',
-        intro: [N('Terminas la entrevista. Es momento de examinar a la paciente.')],
+        escena: 'box',
+        posiciones: true,
+        posInicial: 'sedestacion',
+        ayuda: 'Elige qué examinar y en qué orden. Cada maniobra se hace en una posición anatómica; en el abdomen, el orden importa.',
+        intro: [N('Terminas la entrevista y acompañas a Laura a la camilla del box de examen.'), P('¿Me siento aquí?', 'preocupada')],
         grupos: [
           {
             titulo: 'Preparación',
@@ -280,18 +292,18 @@
             titulo: 'Signos vitales y estado general',
             opciones: [
               {
-                id: 'ef_sv', texto: 'Medir signos vitales', tiempo: 3, flags: ['ef_sv'],
+                id: 'ef_sv', posicion: 'sedestacion', vista: { accesorio: 'manguito', marca: 'brazo' }, texto: 'Medir signos vitales', tiempo: 3, flags: ['ef_sv'],
                 hc: ['Examen físico', 'PA 118/76 mmHg · FC 104 lpm · FR 18 rpm · T 38,1 °C (axilar) · SatO₂ 98 % (aire ambiente).'],
                 efecto: (s, api) => { api.monitor({ PA: '118/76', FC: 104, FR: 18, T: '38,1', SpO2: 98 }); },
                 lineas: [E('Doc, ya tengo los signos: presión 118/76, frecuencia cardíaca 104, respiratoria 18, temperatura 38,1 axilar y saturación 98 % al aire.')],
               },
               {
-                id: 'ef_general', texto: 'Evaluar el estado general', tiempo: 1, flags: ['ef_general'],
+                id: 'ef_general', posicion: 'bipedestacion', texto: 'Evaluar el estado general', tiempo: 1, flags: ['ef_general'],
                 hc: ['Examen físico', 'Lúcida y orientada. Regular estado general, facies de dolor. Mucosas levemente secas. Deambula encorvada, protegiendo el hemiabdomen derecho.'],
                 lineas: [N('Lúcida y orientada, en regular estado general y con facies de dolor. Mucosas levemente secas. Camina encorvada, protegiendo el lado derecho.')],
               },
               {
-                id: 'ef_cp', texto: 'Auscultar corazón y pulmones', tiempo: 2, flags: ['ef_cardiopulmonar'],
+                id: 'ef_cp', posicion: 'sedestacion', vista: { accesorio: 'esteto', marca: 'torax' }, texto: 'Auscultar corazón y pulmones', tiempo: 2, flags: ['ef_cardiopulmonar'],
                 hc: ['Examen físico', 'CV: ruidos cardíacos rítmicos, taquicárdicos, sin soplos. Resp.: murmullo vesicular presente bilateralmente, sin ruidos agregados.'],
                 lineas: [N('Ruidos cardíacos rítmicos y taquicárdicos, sin soplos. Murmullo vesicular presente en ambos campos, sin ruidos agregados.')],
               },
@@ -301,28 +313,28 @@
             titulo: 'Abdomen',
             opciones: [
               {
-                id: 'ab_insp', texto: 'Inspección', tiempo: 1, flags: ['ab_inspeccion'],
+                id: 'ab_insp', posicion: 'supino', vista: { zoom: 'abdomen', zona: 'insp', zoomTxt: 'Inspección del abdomen' }, texto: 'Inspección', tiempo: 1, flags: ['ab_inspeccion'],
                 hc: ['Examen físico', 'Abdomen: plano, simétrico, sin cicatrices ni distensión. Movilidad respiratoria disminuida en el hemiabdomen inferior.'],
                 lineas: [N('Abdomen plano, simétrico, sin cicatrices ni distensión. Moviliza poco el hemiabdomen inferior al respirar.')],
               },
               {
-                id: 'ab_ausc', texto: 'Auscultación', tiempo: 2, flags: ['ab_auscultacion'],
+                id: 'ab_ausc', posicion: 'supino', vista: { accesorio: 'esteto', marca: 'abdomen', zoom: 'abdomen', zona: 'ausc', zoomTxt: 'Auscultar antes de percutir y palpar' }, texto: 'Auscultación', tiempo: 2, flags: ['ab_auscultacion'],
                 efecto: (s) => { if (!s.flags.ab_percusion && !s.flags.ab_palpacion) s.flags.ab_orden = true; },
                 hc: ['Examen físico', 'Ruidos hidroaéreos presentes, disminuidos.'],
                 lineas: [N('Ruidos hidroaéreos presentes, pero disminuidos.')],
               },
               {
-                id: 'ab_perc', texto: 'Percusión', tiempo: 1, flags: ['ab_percusion'],
+                id: 'ab_perc', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'perc', zoomTxt: 'Percusión: dolor en FID' }, texto: 'Percusión', tiempo: 1, flags: ['ab_percusion'],
                 hc: ['Examen físico', 'Timpanismo conservado. Dolor a la percusión en la FID.'],
                 lineas: [N('Timpanismo conservado. La percusión de la fosa ilíaca derecha le provoca dolor.'), P('¡Ay!', 'dolor')],
               },
               {
-                id: 'ab_psup', texto: 'Palpación superficial', tiempo: 1, flags: ['ab_palp_sup', 'ab_palpacion'],
+                id: 'ab_psup', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'psup', zoomTxt: 'Palpación superficial: defensa en FID' }, texto: 'Palpación superficial', tiempo: 1, flags: ['ab_palp_sup', 'ab_palpacion'],
                 hc: ['Examen físico', 'Palpación superficial: defensa muscular voluntaria en la FID; resto depresible.'],
                 lineas: [N('Defensa muscular voluntaria en la fosa ilíaca derecha. El resto del abdomen es depresible.')],
               },
               {
-                id: 'ab_pprof', texto: 'Palpación profunda', tiempo: 1, flags: ['ab_palp_prof', 'ab_palpacion', 'mcburney'],
+                id: 'ab_pprof', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'mcburney', zoomTxt: 'McBurney: ⅓ externo de la línea espino-umbilical' }, texto: 'Palpación profunda', tiempo: 1, flags: ['ab_palp_prof', 'ab_palpacion', 'mcburney'],
                 hc: ['Examen físico', 'Palpación profunda: dolor intenso en el punto de McBurney. Sin masas ni visceromegalias.'],
                 lineas: [P('¡Ay! Ahí, ahí… ¡justo ahí!', 'dolor'), N('Dolor intenso en el **punto de McBurney** (unión del tercio externo con los dos tercios internos de la línea espino-umbilical derecha). No hay masas ni visceromegalias.')],
               },
@@ -332,32 +344,32 @@
             titulo: 'Maniobras y signos',
             opciones: [
               {
-                id: 'm_blum', texto: 'Signo de Blumberg (descompresión brusca)', tiempo: 1, flags: ['m_blumberg'],
+                id: 'm_blum', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'blumberg', zoomTxt: 'Blumberg: dolor al soltar bruscamente' }, texto: 'Signo de Blumberg (descompresión brusca)', tiempo: 1, flags: ['m_blumberg'],
                 hc: ['Examen físico', 'Blumberg (+).'],
                 lineas: [P('¡Aaay! Me dolió más cuando soltó.', 'dolor'), N('**Blumberg positivo**: dolor a la descompresión brusca en la FID, que indica irritación peritoneal.')],
               },
               {
-                id: 'm_rovs', texto: 'Signo de Rovsing', tiempo: 1, flags: ['m_rovsing'],
+                id: 'm_rovs', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'rovsing', zoomTxt: 'Rovsing: presión en FII → dolor en FID' }, texto: 'Signo de Rovsing', tiempo: 1, flags: ['m_rovsing'],
                 hc: ['Examen físico', 'Rovsing (+).'],
                 lineas: [N('Al comprimir la fosa ilíaca **izquierda**, la paciente refiere dolor en la **derecha**: **Rovsing positivo**.')],
               },
               {
-                id: 'm_psoas', texto: 'Signo del psoas', tiempo: 1, flags: ['m_psoas'],
+                id: 'm_psoas', posicion: 'lateral', vista: { variante: 'psoas', accesorio: 'mano', marca: 'rodilla' }, texto: 'Signo del psoas', tiempo: 1, flags: ['m_psoas'],
                 hc: ['Examen físico', 'Psoas (+).'],
                 lineas: [N('En decúbito lateral izquierdo, la extensión pasiva de la cadera derecha provoca dolor: **psoas positivo** (sugiere un apéndice retrocecal).')],
               },
               {
-                id: 'm_obt', texto: 'Signo del obturador', tiempo: 1, flags: ['m_obturador'],
+                id: 'm_obt', posicion: 'supino', vista: { variante: 'obturador', accesorio: 'mano', marca: 'rodilla' }, texto: 'Signo del obturador', tiempo: 1, flags: ['m_obturador'],
                 hc: ['Examen físico', 'Obturador (−).'],
                 lineas: [N('La rotación interna del muslo derecho flexionado no provoca dolor: **obturador negativo**.')],
               },
               {
-                id: 'm_gior', texto: 'Puñopercusión lumbar (Giordano)', tiempo: 1, flags: ['m_giordano'],
+                id: 'm_gior', posicion: 'sedestacion', vista: { zoom: 'espalda', zona: 'giordano', zoomTxt: 'Puñopercusión del ángulo costovertebral' }, texto: 'Puñopercusión lumbar (Giordano)', tiempo: 1, flags: ['m_giordano'],
                 hc: ['Examen físico', 'Puñopercusión lumbar (Giordano) negativa bilateral.'],
                 lineas: [N('**Puñopercusión lumbar negativa** bilateral: es poco probable una pielonefritis.')],
               },
               {
-                id: 'm_murphy', texto: 'Signo de Murphy', tiempo: 1, flags: ['m_murphy'],
+                id: 'm_murphy', posicion: 'supino', vista: { accesorio: 'mano', marca: 'abdomen', zoom: 'abdomen', zona: 'murphy', zoomTxt: 'Murphy: bajo el reborde costal derecho' }, texto: 'Signo de Murphy', tiempo: 1, flags: ['m_murphy'],
                 hc: ['Examen físico', 'Murphy (−).'],
                 lineas: [N('**Murphy negativo**: no hay detención inspiratoria a la palpación del hipocondrio derecho.')],
               },
@@ -367,7 +379,7 @@
             titulo: 'Examen ginecológico y otros',
             opciones: [
               {
-                id: 'gin', texto: 'Examen ginecológico (especuloscopía y tacto bimanual)', tiempo: 4, flags: ['gin_examen'],
+                id: 'gin', posicion: 'litotomia', texto: 'Examen ginecológico (especuloscopía y tacto bimanual)', tiempo: 4, flags: ['gin_examen'],
                 hc: ['Examen físico', 'Especuloscopía: cuello sano, sin flujo patológico ni sangrado. Tacto bimanual: movilización cervical indolora, anexos no palpables, fondo de saco no abombado.'],
                 efecto: (s) => {
                   if (!s.flags.ef_chaperona) {
@@ -379,7 +391,7 @@
                   N('Cuello uterino sano, sin flujo patológico ni sangrado. **La movilización cervical es indolora**, los anexos no se palpan y el fondo de saco no está abombado.')],
               },
               {
-                id: 'tacto', texto: 'Tacto rectal', tiempo: 3, flags: ['tacto_rectal'],
+                id: 'tacto', posicion: 'lateral', texto: 'Tacto rectal', tiempo: 3, flags: ['tacto_rectal'],
                 hc: ['Examen físico', 'Tacto rectal: ampolla vacía, dolor leve a la derecha.'],
                 lineas: [P('¿Eso es necesario…?', 'preocupada'), N('Ampolla rectal vacía y dolor leve hacia la derecha. En este contexto aporta poca información diagnóstica adicional.')],
               },
@@ -392,15 +404,19 @@
       {
         id: 'estudios',
         titulo: 'Laboratorio y gabinete',
-        tipo: 'acciones',
-        ayuda: 'Solicita los estudios que consideres necesarios. Cada uno consume tiempo y los innecesarios restan eficiencia.',
-        intro: [E('Doc, ¿qué exámenes le pido a Laura? El laboratorio es rápido y la ecografía está disponible ahora.')],
-        grupos: [
+        tipo: 'solicitud',
+        ayuda: 'Llena la hoja de solicitud: marca los exámenes, firma y envía. Los exámenes de una misma hoja se procesan en paralelo (demora el más lento). Pedir de más también cuenta.',
+        intro: [N('Vuelves al consultorio con Laura y tomas una hoja de solicitud de exámenes.'), E('Doc, cuando tenga la hoja firmada, tomo las muestras y aviso a imagen.')],
+        institucion: 'HOSPITAL GENERAL',
+        servicio: 'Servicio de Urgencias',
+        ubicacion: 'Box 3',
+        textoEnvio: 'Recibí la solicitud, Doc. Ya tomo las muestras y aviso a imagen.',
+        secciones: [
           {
-            titulo: 'Laboratorio',
+            titulo: 'Hematología',
             opciones: [
               {
-                id: 'lab_hemo', texto: 'Hemograma completo', tiempo: 10, flags: ['lab_hemograma'],
+                id: 'lab_hemo', texto: 'Hemograma completo', tiempo: 30, flags: ['lab_hemograma'],
                 hc: ['Laboratorio', 'Hemograma: Hb 13,1 g/dL · Leucocitos 14 800/mm³ (neutrófilos 72 %, bastones 3 %) · Plaquetas 268 000/mm³.'],
                 lineas: [{ quien: 'enfermera', texto: 'Doc, llegó el hemograma.', reporte: { titulo: 'Hemograma', filas: [
                   ['Hemoglobina', '13,1 g/dL', '12–16'], ['Hematocrito', '39 %', '36–46'],
@@ -409,17 +425,61 @@
                 ] } }],
               },
               {
-                id: 'lab_pcr', texto: 'Proteína C reactiva (PCR)', tiempo: 10, flags: ['lab_pcr'],
+                id: 'lab_coag', texto: 'Coagulograma (TP/INR, TTPa)', tiempo: 30, flags: ['lab_coag'],
+                hc: ['Laboratorio', 'Coagulograma: INR 1,0 · TTPa 29 s.'],
+                lineas: [{ quien: 'enfermera', texto: 'Coagulograma normal.', reporte: { titulo: 'Coagulograma', filas: [['INR', '1,0', '0,8–1,2'], ['TTPa', '29 s', '25–35']] } }],
+              },
+              {
+                id: 'lab_vsg', texto: 'Velocidad de sedimentación (VSG)', tiempo: 30, flags: ['lab_vsg'],
+                hc: ['Laboratorio', 'VSG: 28 mm/h (VR < 20).'],
+                lineas: [{ quien: 'enfermera', texto: 'Llegó la VSG.', reporte: { titulo: 'Hematología', filas: [['VSG', '28 mm/h', '< 20', true]] } }],
+              },
+              {
+                id: 'lab_grupo', texto: 'Grupo sanguíneo y factor Rh', tiempo: 30, flags: ['lab_grupo'],
+                hc: ['Laboratorio', 'Grupo sanguíneo: O, Rh positivo.'],
+                lineas: [{ quien: 'enfermera', texto: 'Tipificación lista.', reporte: { titulo: 'Inmunohematología', filas: [['Grupo ABO', 'O', '—'], ['Factor Rh', 'Positivo', '—']] } }],
+              },
+            ],
+          },
+          {
+            titulo: 'Bioquímica',
+            opciones: [
+              {
+                id: 'lab_pcr', texto: 'Proteína C reactiva (PCR)', tiempo: 30, flags: ['lab_pcr'],
                 hc: ['Laboratorio', 'PCR: 48 mg/L (VR < 5).'],
                 lineas: [{ quien: 'enfermera', texto: 'Resultado de la PCR.', reporte: { titulo: 'Bioquímica', filas: [['Proteína C reactiva', '48 mg/L', '< 5', true]] } }],
               },
               {
-                id: 'lab_bhcg', texto: 'β-hCG sérica (prueba de embarazo)', tiempo: 10, flags: ['lab_bhcg'],
-                hc: ['Laboratorio', 'β-hCG sérica: negativa (< 5 mUI/mL).'],
-                lineas: [{ quien: 'enfermera', texto: 'La β-hCG salió negativa, Doc.', reporte: { titulo: 'Prueba de embarazo', filas: [['β-hCG sérica', '< 5 mUI/mL', 'Negativa < 5']] } }],
+                id: 'lab_bioq', texto: 'Electrolitos, urea y creatinina', tiempo: 30, flags: ['lab_bioq'],
+                hc: ['Laboratorio', 'Na 138 · K 3,9 mEq/L · Urea 28 mg/dL · Creatinina 0,7 mg/dL.'],
+                lineas: [{ quien: 'enfermera', texto: 'Electrolitos y función renal.', reporte: { titulo: 'Bioquímica', filas: [
+                  ['Sodio', '138 mEq/L', '135–145'], ['Potasio', '3,9 mEq/L', '3,5–5,0'], ['Urea', '28 mg/dL', '15–40'], ['Creatinina', '0,7 mg/dL', '0,5–1,1'],
+                ] } }],
               },
               {
-                id: 'lab_orina', texto: 'Examen general de orina', tiempo: 10, flags: ['lab_orina'],
+                id: 'lab_glu', texto: 'Glucemia', tiempo: 30, flags: ['lab_glucemia'],
+                hc: ['Laboratorio', 'Glucemia: 96 mg/dL.'],
+                lineas: [{ quien: 'enfermera', texto: 'Glucemia normal.', reporte: { titulo: 'Bioquímica', filas: [['Glucemia', '96 mg/dL', '70–110']] } }],
+              },
+              {
+                id: 'lab_hep', texto: 'Perfil hepático (TGO, TGP, FA, bilirrubinas)', tiempo: 30, flags: ['lab_hepatico'],
+                hc: ['Laboratorio', 'TGO 22 · TGP 18 · FA 70 U/L · Bilirrubina total 0,6 mg/dL (normales).'],
+                lineas: [{ quien: 'enfermera', texto: 'Perfil hepático normal.', reporte: { titulo: 'Perfil hepático', filas: [
+                  ['TGO (AST)', '22 U/L', '< 35'], ['TGP (ALT)', '18 U/L', '< 35'], ['Fosfatasa alcalina', '70 U/L', '40–130'], ['Bilirrubina total', '0,6 mg/dL', '0,2–1,2'],
+                ] } }],
+              },
+              {
+                id: 'lab_amil', texto: 'Amilasa y lipasa', tiempo: 30, flags: ['lab_amilasa'],
+                hc: ['Laboratorio', 'Amilasa 62 U/L · Lipasa 30 U/L (normales).'],
+                lineas: [{ quien: 'enfermera', texto: 'Amilasa y lipasa normales.', reporte: { titulo: 'Enzimas pancreáticas', filas: [['Amilasa', '62 U/L', '28–100'], ['Lipasa', '30 U/L', '13–60']] } }],
+              },
+            ],
+          },
+          {
+            titulo: 'Orina',
+            opciones: [
+              {
+                id: 'lab_orina', texto: 'Examen general de orina', tiempo: 30, flags: ['lab_orina'],
                 hc: ['Laboratorio', 'EGO: densidad 1025, leucocitos 2–3/campo, hematíes 1–2/campo, nitritos (−), sin bacterias.'],
                 lineas: [{ quien: 'enfermera', texto: 'Llegó el examen de orina.', reporte: { titulo: 'Examen general de orina', filas: [
                   ['Densidad', '1025', '1005–1030'], ['Leucocitos', '2–3 /campo', '< 5'], ['Hematíes', '1–2 /campo', '< 3'],
@@ -427,22 +487,25 @@
                 ] } }],
               },
               {
-                id: 'lab_bioq', texto: 'Electrolitos, urea y creatinina', tiempo: 10, flags: ['lab_bioq'],
-                hc: ['Laboratorio', 'Na 138 · K 3,9 mEq/L · Urea 28 mg/dL · Creatinina 0,7 mg/dL.'],
-                lineas: [{ quien: 'enfermera', texto: 'Electrolitos y función renal.', reporte: { titulo: 'Bioquímica', filas: [
-                  ['Sodio', '138 mEq/L', '135–145'], ['Potasio', '3,9 mEq/L', '3,5–5,0'], ['Urea', '28 mg/dL', '15–40'], ['Creatinina', '0,7 mg/dL', '0,5–1,1'],
-                ] } }],
+                id: 'lab_urocult', texto: 'Urocultivo', tiempo: 10, flags: ['lab_urocultivo'],
+                hc: ['Laboratorio', 'Urocultivo enviado (resultado en 48–72 h).'],
+                lineas: [E('Mandé el urocultivo, Doc. El resultado demora entre 48 y 72 horas.')],
               },
+            ],
+          },
+          {
+            titulo: 'Hormonas',
+            opciones: [
               {
-                id: 'lab_coag', texto: 'Coagulograma (TP/INR, TTPa)', tiempo: 10, flags: ['lab_coag'],
-                hc: ['Laboratorio', 'Coagulograma: INR 1,0 · TTPa 29 s.'],
-                lineas: [{ quien: 'enfermera', texto: 'Coagulograma normal.', reporte: { titulo: 'Coagulograma', filas: [['INR', '1,0', '0,8–1,2'], ['TTPa', '29 s', '25–35']] } }],
+                id: 'lab_bhcg', texto: 'β-hCG sérica (prueba de embarazo)', tiempo: 30, flags: ['lab_bhcg'],
+                hc: ['Laboratorio', 'β-hCG sérica: negativa (< 5 mUI/mL).'],
+                lineas: [{ quien: 'enfermera', texto: 'La β-hCG salió negativa, Doc.', reporte: { titulo: 'Prueba de embarazo', filas: [['β-hCG sérica', '< 5 mUI/mL', 'Negativa < 5']] } }],
               },
-              {
-                id: 'lab_amil', texto: 'Amilasa y lipasa', tiempo: 10, flags: ['lab_amilasa'],
-                hc: ['Laboratorio', 'Amilasa 62 U/L · Lipasa 30 U/L (normales).'],
-                lineas: [{ quien: 'enfermera', texto: 'Amilasa y lipasa normales.', reporte: { titulo: 'Enzimas pancreáticas', filas: [['Amilasa', '62 U/L', '28–100'], ['Lipasa', '30 U/L', '13–60']] } }],
-              },
+            ],
+          },
+          {
+            titulo: 'Microbiología',
+            opciones: [
               {
                 id: 'lab_hcult', texto: 'Hemocultivos', tiempo: 10, flags: ['lab_hemocultivo'],
                 hc: ['Laboratorio', 'Hemocultivos enviados (resultado en 48–72 h).'],
@@ -454,10 +517,16 @@
             titulo: 'Imagen (gabinete)',
             opciones: [
               {
-                id: 'img_eco', texto: 'Ecografía abdominal y pélvica', tiempo: 35, flags: ['img_eco'],
+                id: 'img_eco', texto: 'Ecografía abdominal y pélvica', tiempo: 40, flags: ['img_eco'],
                 hc: ['Imagen', 'Ecografía: apéndice no compresible de 9 mm, pared engrosada, grasa periapendicular hiperecogénica y mínimo líquido periapendicular. Útero y ovarios normales. Sin líquido libre. → Compatible con apendicitis aguda no complicada.'],
                 lineas: [{ quien: 'enfermera', texto: 'Doc, el radiólogo mandó el informe de la ecografía.', reporte: { titulo: 'Ecografía abdominal y pélvica', texto:
                   'En la FID se observa una estructura tubular ciega, **no compresible**, de **9 mm** de diámetro, con pared engrosada y aumento de la ecogenicidad de la grasa periapendicular. Hay mínimo líquido periapendicular, sin colecciones. Útero y ovarios de aspecto normal. No hay líquido libre en el fondo de saco.\n**Conclusión:** compatible con apendicitis aguda no complicada.' } }],
+              },
+              {
+                id: 'img_tv', texto: 'Ecografía transvaginal', tiempo: 30, flags: ['img_tv'],
+                hc: ['Imagen', 'Ecografía transvaginal: útero y ovarios normales, sin masas anexiales ni líquido libre. Sin saco gestacional.'],
+                lineas: [{ quien: 'enfermera', texto: 'Informe de la ecografía transvaginal.', reporte: { titulo: 'Ecografía transvaginal', texto:
+                  'Útero en anteversión, de tamaño normal, endometrio de 8 mm. Ovarios de aspecto normal con folículos, **sin masas anexiales**. No hay saco gestacional ni líquido libre en el fondo de saco. El apéndice no se evalúa por esta vía.' } }],
               },
               {
                 id: 'img_tc', texto: 'Tomografía de abdomen y pelvis con contraste', tiempo: 60, flags: ['img_tc'],
@@ -774,6 +843,12 @@
           { flag: 'k_dudas', texto: 'Resuelve dudas' }, { flag: 'k_familia', texto: 'Ofrece avisar a un familiar' }, { flag: 'escucha', texto: 'Escucha activa en la anamnesis' }],
         explicacion: 'El consentimiento informado debe incluir los riesgos, los beneficios y las alternativas, en lenguaje comprensible.', refs: ['sabiston'],
       },
+      {
+        id: 'c15', texto: 'Coloca a la paciente en la posición anatómica correcta para cada maniobra', peso: 0.5,
+        // Solo se evalúa en modo desafío (en modo automático la paciente se coloca sola)
+        eval: (f, s) => (!s.posManual ? 'NA' : !f.pos_aciertos ? 'I' : !f.pos_errores ? 'A' : f.pos_errores <= 2 ? 'P' : 'I'),
+        explicacion: 'Examen abdominal en decúbito supino (con las piernas semiflexionadas para relajar la pared), psoas en decúbito lateral izquierdo, obturador en supino con cadera y rodilla flexionadas a 90°, Giordano sentada, examen ginecológico en posición de litotomía y tacto rectal en decúbito lateral (Sims).', refs: ['porto'],
+      },
     ],
 
     criticos: [
@@ -789,6 +864,7 @@
       { flag: 'i_sin_analgesia', texto: 'Retrasar la analgesia es un mito: no enmascara el diagnóstico y prolonga el sufrimiento de la paciente.', ref: 'cochrane' },
       { flag: 'i_sng_innecesaria', texto: 'La sonda nasogástrica no está indicada de rutina en la apendicitis no complicada.' },
       { flag: 'tc_innecesaria', texto: 'TC después de una ecografía concluyente: más radiación, más costo y más tiempo, sin cambiar la conducta.', ref: 'wses' },
+      { flag: 'lab_urocultivo', texto: 'Con un examen de orina normal y sin síntomas urinarios, el urocultivo no aporta al diagnóstico.' },
       { flag: 'lab_hemocultivo', texto: 'Los hemocultivos no están indicados en la apendicitis no complicada sin sepsis.' },
       { flag: 'img_rx', texto: 'La radiografía simple de abdomen tiene bajo rendimiento para apendicitis.', ref: 'wses' },
       { flag: 'k_falsa', texto: 'Prometer «cero riesgo» es falso y vicia el consentimiento informado.' },
