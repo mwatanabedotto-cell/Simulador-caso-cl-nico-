@@ -78,7 +78,6 @@
   }
 
   // ------------------------------------------------------------ paletas
-  const PAL_ENFERMERA = { piel: '#c98d64', pielD: '#a8714d', pelo: '#2b1b14', ropa: '#6d5a8a', ropaD: '#594873', zapato: '#ecebe6', gorro: true };
   const MANO_MED = '#d9a67c', BATA = '#f3f5f8';
 
   // ------------------------------------------------------------ vista aérea (cenital) del box de examen
@@ -275,12 +274,7 @@
     if (tipo === 'esteto') { e.lin(dx, dy + s * 6, mx, my, '#3a3d40'); e.eli(mx, my, 2, 2, '#c0c6cc'); }
     if (tipo === 'manguito') { e.lin(mx + 4, my, mx + 12, my + 8 * s, '#333'); e.eli(mx + 13, my + 9 * s, 2, 3, '#1c1c1c'); }
   }
-  function enfermeraArriba(g) {
-    const e = esc2(g), p = PAL_ENFERMERA;
-    e.eli(232, 136, 13, 7, p.ropa); e.lin(220, 137, 244, 137, p.ropaD);
-    e.eli(221, 138, 3, 3, p.piel); e.eli(243, 138, 3, 3, p.piel);
-    cabezaArriba(g, e, 232, 135, p);
-  }
+
 
   // Fondo del box visto desde arriba
   function fondoArriba(g, o) {
@@ -600,7 +594,6 @@
     if (pose.vistaLateral) {
       fondoLateral(g, o);
       const fig = lienzo(W, H), fg = ctx(fig);
-      if (o.enfermera) { fg.save(); fg.translate(-84, 4); POSES.bipedestacion.dibujar(fg, { ...PAL_ENFERMERA, coleta: false, manoAbd: false, ojos: '#2b1b14', pantalon: '#594873', pantalonD: '#4a3b61' }, 'neutral'); fg.restore(); }
       pose.dibujar(fg, o.pal, o.expr || 'neutral', o.variante);
       contorno(fig, '#1d1410');
       g.drawImage(fig, 0, 0);
@@ -620,7 +613,6 @@
     fondoArriba(g, o);
     const fig = lienzo(W, H), fg = ctx(fig);
     pose.dibujar(fg, o.pal, o.expr || 'neutral', o.variante);
-    if (o.enfermera) enfermeraArriba(fg);
     contorno(fig, '#1d1410');
     g.drawImage(fig, 0, 0);
     if (o.accesorio && o.marca) {
@@ -706,7 +698,6 @@
 
   // ------------------------------------------------------------ retratos 64x64 (recorte del busto)
   const FONDO_RETRATO = { paciente: '#3a3226', enfermera: '#33293f', medico: '#1c2f3d', narrador: '#26302a' };
-  const PAL_ENF_BUSTO = { ...PAL_ENFERMERA, sueter: '#6d5a8a', sueterD: '#594873', sueterL: '#806c9e', cuello: '#c98d64', ojos: '#2b1b14' };
   function retrato(c, quien, expr, pal) {
     const g = ctx(c);
     g.clearRect(0, 0, 64, 64);
@@ -730,8 +721,14 @@
       px(g, 46, 57, '#7c858e');
       return;
     }
+    if (quien === 'enfermera') { // voz fuera de pantalla: solo un ícono de altavoz con ondas
+      rect(f, 14, 24, 10, 16, '#6d5a8a'); poli(f, [[24, 24], [36, 12], [36, 52], [24, 40]], '#806c9e');
+      contorno(capa, '#1d1410'); g.drawImage(capa, 0, 0);
+      [[42, 26, 6], [46, 22, 10], [50, 18, 14]].forEach(([x, y, h], i) => { rect(g, x, y + 2, 2, h * 2 - 4, i === 2 ? '#806c9e' : '#b9a0dd'); px(g, x - 1, y + 1, '#b9a0dd'); px(g, x - 1, y + h * 2 - 2, '#b9a0dd'); });
+      return;
+    }
     const tmp = lienzo(W, H), tg = ctx(tmp);
-    busto(tg, quien === 'enfermera' ? PAL_ENF_BUSTO : pal, quien === 'enfermera' ? 'neutral' : expr);
+    busto(tg, pal, expr);
     contorno(tmp, '#1d1410');
     g.drawImage(tmp, 128, 52, 64, 64, 0, 0, 64, 64);
   }

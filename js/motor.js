@@ -239,7 +239,7 @@
     PX().escena(cv, {
       lugar: lugarActual(), pose: S.pos, variante: v && v.variante, accesorio: v && v.accesorio, marca: v && v.marca,
       pal: palPaciente(), expr: S.expr, hora: [Math.floor(tot / 60) % 24, tot % 60],
-      enfermera: enExploracion() && S.flags.ef_chaperona, suero: !!S.flags.i_hidratacion,
+      suero: !!S.flags.i_hidratacion, // la enfermera nunca se dibuja: solo habla fuera de pantalla
     });
     const box = lugarActual() === 'box';
     $('#escChip').hidden = !box;

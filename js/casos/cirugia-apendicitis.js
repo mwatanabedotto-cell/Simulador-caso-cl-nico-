@@ -40,7 +40,7 @@
     personajes: {
       paciente: { nombre: 'Laura', clase: 'pac' },
       medico: { nombre: 'Tú (médico/a de guardia)', clase: 'med' },
-      enfermera: { nombre: 'Enf. Rosa', clase: 'enf' },
+      enfermera: { nombre: 'Enf. Rosa (fuera de escena)', clase: 'enf' },
       narrador: { nombre: '', clase: 'nar' },
     },
     exprInicial: 'dolor',
