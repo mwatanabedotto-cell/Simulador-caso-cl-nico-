@@ -298,9 +298,9 @@
                 lineas: [E('Doc, ya tengo los signos: presión 118/76, frecuencia cardíaca 104, respiratoria 18, temperatura 38,1 axilar y saturación 98 % al aire.')],
               },
               {
-                id: 'ef_general', posicion: 'bipedestacion', texto: 'Evaluar el estado general', tiempo: 1, flags: ['ef_general'],
-                hc: ['Examen físico', 'Lúcida y orientada. Regular estado general, facies de dolor. Mucosas levemente secas. Deambula encorvada, protegiendo el hemiabdomen derecho.'],
-                lineas: [N('Lúcida y orientada, en regular estado general y con facies de dolor. Mucosas levemente secas. Camina encorvada, protegiendo el lado derecho.')],
+                id: 'ef_general', posicion: 'sedestacion', texto: 'Evaluar el estado general', tiempo: 1, flags: ['ef_general'],
+                hc: ['Examen físico', 'Lúcida y orientada. Regular estado general, facies de dolor. Mucosas levemente secas. Llegó a la camilla encorvada y se sienta protegiendo el hemiabdomen derecho.'],
+                lineas: [N('Inspección general: lúcida y orientada, en regular estado general y con facies de dolor. Mucosas levemente secas. Llegó a la camilla encorvada y se sienta protegiendo el lado derecho.')],
               },
               {
                 id: 'ef_cp', posicion: 'sedestacion', vista: { accesorio: 'esteto', marca: 'torax' }, texto: 'Auscultar corazón y pulmones', tiempo: 2, flags: ['ef_cardiopulmonar'],

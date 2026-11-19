@@ -61,6 +61,7 @@ Crea `js/casos/<id>.js` que haga `window.CASOS.push({...})` (usa el caso de apen
 - `fases[]` de dos tipos:
   - `tipo: 'acciones'` → `grupos[]` con `opciones[]` (`id`, `texto`, `tiempo`, `flags`, `hc`, `lineas`, `efecto`, `estabilidad`). Un grupo con `requiere: 'flag'` se desbloquea con ese flag.
   - `tipo: 'solicitud'` → hoja de solicitud con `secciones[]` de `opciones[]` (los exámenes de una hoja se procesan en paralelo).
+  - Las posiciones acostadas se ven desde arriba (vista aérea de la camilla); sentada y de pie se ven con la camilla de lado y la paciente de frente al médico, con la mano del médico en primera persona.
   - En exploración, cada opción puede tener `posicion` (clave de `Pixel.POSES`) y `vista` (`accesorio`, `marca`, `variante`, `zoom`, `zona`, `zoomTxt`). La fase usa `escena: 'box'` y `posiciones: true`.
   - `tipo: 'pasos'` → `pasos[]` de `tipo: 'unica' | 'multiple'`, con `opciones[]` y, opcionalmente, `saltarSi` y `alConfirmar`.
 - Líneas de diálogo: `['paciente' | 'medico' | 'enfermera' | 'narrador', 'texto', 'expresión']`. Expresiones: `neutral`, `dolor`, `preocupada`, `alivio`, `sorpresa`. Para informes de laboratorio o imagen se usa `{ quien, texto, reporte: { titulo, filas | texto } }`.

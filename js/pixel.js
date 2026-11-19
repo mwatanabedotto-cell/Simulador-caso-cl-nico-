@@ -196,33 +196,46 @@
       },
     },
     sedestacion: {
-      nombre: 'Sedestación', corto: 'Sentada',
-      desc: 'Sentada al borde de la camilla. Signos vitales, auscultación cardiopulmonar y puñopercusión lumbar.',
-      marcas: () => ({ brazo: [136, 106], torax: [150, 110], espalda: [144, 95], abdomen: [150, 112] }),
-      dibujar(g, p) {
-        const e = esc2(g);
-        e.eli(144, 131, 3, 2, p.zapato); e.eli(157, 131, 3, 2, p.zapato);
-        e.eli(150, 103, 15, 7, p.ropa);
-        e.cap(144, 106, 144, 118, 5, p.ropa); e.cap(144, 118, 144, 126, 4, p.piel);
-        e.cap(157, 106, 157, 118, 5, p.ropa); e.cap(157, 118, 157, 126, 4, p.piel);
-        e.eli(150, 100, 17, 7, p.ropa); e.lin(136, 101, 164, 101, p.ropaD);
-        e.cap(134, 100, 135, 106, 4, p.ropa); e.cap(135, 106, 140, 118, 2, p.piel); e.eli(141, 120, 2, 3, p.piel);
-        e.cap(166, 100, 165, 106, 4, p.ropa); e.cap(165, 106, 160, 118, 2, p.piel); e.eli(159, 120, 2, 3, p.piel);
-        cabezaArriba(g, e, 150, 99, p);
+      nombre: 'Sedestación', corto: 'Sentada', vistaLateral: true,
+      desc: 'Sentada al borde de la camilla, de frente al médico. Inspección general, signos vitales, auscultación cardiopulmonar y puñopercusión lumbar.',
+      // Coordenadas finales (camilla de lado, paciente de frente)
+      marcas: () => ({ brazo: [137, 64], torax: [167, 66], espalda: [160, 70], abdomen: [154, 96] }),
+      dibujar(g, p, ex) {
+        // piernas colgando por delante de la camilla
+        capsula(g, 149, 122, 149, 158, 5, p.piel); capsula(g, 171, 122, 171, 158, 5, p.piel);
+        linea(g, 152, 126, 152, 156, p.pielD); linea(g, 174, 126, 174, 156, p.pielD);
+        elipse(g, 147, 162, 7, 3, p.zapato); elipse(g, 173, 162, 7, 3, p.zapato);
+        // muslos en escorzo (rodillas hacia el médico)
+        elipse(g, 149, 118, 8, 6, p.piel); elipse(g, 171, 118, 8, 6, p.piel);
+        // bata
+        poli(g, [[140, 46], [180, 46], [178, 80], [186, 116], [134, 116], [142, 80]], p.ropa);
+        linea(g, 160, 50, 160, 112, p.ropaD); rect(g, 135, 114, 50, 2, p.ropaD);
+        poli(g, [[152, 46], [160, 56], [168, 46]], p.pielD);
+        // brazos y manos sobre el regazo
+        capsula(g, 141, 50, 136, 64, 6, p.ropa); capsula(g, 135, 66, 134, 86, 4, p.piel);
+        if (p.manoAbd && ex === 'dolor') { capsula(g, 134, 86, 150, 96, 4, p.piel); elipse(g, 153, 97, 5, 4, p.piel); }
+        else { capsula(g, 134, 86, 145, 104, 4, p.piel); elipse(g, 147, 106, 5, 4, p.piel); }
+        capsula(g, 179, 50, 184, 64, 6, p.ropa); capsula(g, 185, 66, 186, 86, 4, p.piel); capsula(g, 186, 86, 175, 104, 4, p.piel); elipse(g, 173, 106, 5, 4, p.piel);
+        rect(g, 155, 34, 10, 14, p.pielD);
+        cabezaFrente(g, 160, 24, p, ex);
       },
     },
     bipedestacion: {
-      nombre: 'Bipedestación', corto: 'De pie',
-      desc: 'De pie junto a la camilla. Permite evaluar la postura, la marcha y la facies.',
-      marcas: () => ({ abdomen: [148, 140], torax: [150, 140], brazo: [136, 134], espalda: [146, 128] }),
-      dibujar(g, p) {
-        const e = esc2(g);
-        e.eli(145, 141, 3, 4, p.zapato); e.eli(155, 141, 3, 4, p.zapato);
-        e.eli(150, 134, 16, 7, p.ropa); e.lin(136, 135, 164, 135, p.ropaD);
-        e.eli(167, 136, 3, 3, p.piel);
-        if (p.manoAbd) { e.cap(135, 135, 143, 140, 2, p.piel); e.eli(144, 141, 2, 2, p.piel); }
-        else e.eli(133, 136, 3, 3, p.piel);
-        cabezaArriba(g, e, 150, 133, p);
+      nombre: 'Bipedestación', corto: 'De pie', vistaLateral: true,
+      desc: 'De pie frente a la camilla, de frente al médico. Permite evaluar la postura, la marcha y la facies.',
+      marcas: () => ({ abdomen: [152, 100], torax: [167, 72], brazo: [137, 70], espalda: [160, 76] }),
+      dibujar(g, p, ex) {
+        capsula(g, 150, 118, 150, 186, 7, p.pantalon || p.piel); capsula(g, 170, 118, 170, 186, 7, p.pantalon || p.piel);
+        linea(g, 154, 126, 154, 180, p.pantalonD || p.pielD); linea(g, 174, 126, 174, 180, p.pantalonD || p.pielD);
+        poli(g, [[140, 52], [180, 52], [178, 86], [184, 128], [136, 128], [142, 86]], p.ropa);
+        linea(g, 160, 56, 160, 126, p.ropaD); rect(g, 137, 126, 47, 2, p.ropaD);
+        poli(g, [[152, 52], [160, 62], [168, 52]], p.pielD);
+        capsula(g, 179, 56, 184, 70, 6, p.ropa); capsula(g, 185, 72, 187, 96, 4, p.piel); capsula(g, 187, 96, 186, 116, 4, p.piel); elipse(g, 186, 119, 4, 5, p.piel);
+        capsula(g, 141, 56, 136, 70, 6, p.ropa); capsula(g, 135, 72, 135, 92, 4, p.piel);
+        if (p.manoAbd) { capsula(g, 135, 92, 148, 100, 4, p.piel); elipse(g, 151, 101, 5, 4, p.piel); }
+        else { capsula(g, 135, 92, 134, 116, 4, p.piel); elipse(g, 134, 119, 4, 5, p.piel); }
+        rect(g, 155, 40, 10, 14, p.pielD);
+        cabezaFrente(g, 160, 30, p, ex);
       },
     },
     litotomia: {
@@ -497,6 +510,77 @@
     poli(g, [[258, 162], [318, 162], [320, 178], [262, 178]], '#8a6a45'); poli(g, [[258, 162], [318, 162], [319, 165], [259, 165]], '#a07c52');
   }
 
+
+  // ------------------------------------------------------------ vista lateral (paciente sentada o de pie)
+  // ------------------------------------------------------------ paciente de frente sobre la camilla vista de lado
+  function cabezaFrente(g, cx, cy, p, ex) {
+    const osc = '#2a1a12', ojoB = '#efe8dc', boca = '#9a4a42';
+    if (p.coleta) capsula(g, cx + 9, cy - 6, cx + 13, cy + 10, 3, p.pelo);
+    elipse(g, cx, cy, 12, 13, p.pelo);
+    elipse(g, cx, cy + 2, 10, 11, p.piel);
+    for (let y = cy - 4; y <= cy + 10; y++) px(g, cx + 9, y, p.pielD);
+    poli(g, [[cx - 11, cy - 3], [cx - 8, cy - 10], [cx + 2, cy - 13], [cx + 10, cy - 8], [cx + 11, cy - 1], [cx + 6, cy - 6], [cx - 2, cy - 5], [cx - 8, cy + 1]], p.pelo);
+    capsula(g, cx - 10, cy - 2, cx - 11, cy + 9, 1, p.pelo); capsula(g, cx + 10, cy - 2, cx + 11, cy + 9, 1, p.pelo);
+    if (p.gorro) { poli(g, [[cx - 10, cy - 8], [cx - 8, cy - 15], [cx + 8, cy - 15], [cx + 10, cy - 8]], '#ecebe6'); rect(g, cx - 1, cy - 14, 2, 5, '#a24b3c'); rect(g, cx - 3, cy - 12, 6, 2, '#a24b3c'); }
+    const [lx, rx, oy] = [cx - 4, cx + 4, cy + 1];
+    const ojo = (x) => { rect(g, x - 2, oy - 1, 4, 2, ojoB); rect(g, x - 1, oy - 1, 2, 2, p.ojos || osc); rect(g, x - 2, oy - 2, 5, 1, osc); };
+    if (ex === 'dolor') {
+      linea(g, lx - 2, oy - 1, lx + 1, oy, osc); linea(g, lx + 1, oy, lx - 2, oy + 1, osc);
+      linea(g, rx + 2, oy - 1, rx - 1, oy, osc); linea(g, rx - 1, oy, rx + 2, oy + 1, osc);
+      linea(g, lx - 3, oy - 4, lx + 2, oy - 5, osc); linea(g, rx - 2, oy - 5, rx + 3, oy - 4, osc);
+      rect(g, cx - 3, cy + 7, 6, 3, '#7a2c26'); rect(g, cx - 2, cy + 8, 4, 1, ojoB);
+      elipse(g, cx + 8, cy - 4, 1, 2, '#a9d8ee');
+    } else if (ex === 'alivio') {
+      [lx, rx].forEach((x) => { rect(g, x - 2, oy, 4, 1, osc); px(g, x - 2, oy - 1, osc); px(g, x + 1, oy - 1, osc); rect(g, x - 2, oy - 4, 4, 1, osc); });
+      rect(g, cx - 2, cy + 8, 4, 1, boca); px(g, cx - 3, cy + 7, boca); px(g, cx + 2, cy + 7, boca);
+    } else {
+      ojo(lx); ojo(rx);
+      if (ex === 'preocupada') { linea(g, lx - 2, oy - 4, lx + 1, oy - 5, osc); linea(g, rx - 1, oy - 5, rx + 2, oy - 4, osc); }
+      else { rect(g, lx - 2, oy - 4, 4, 1, osc); rect(g, rx - 2, oy - 4, 4, 1, osc); }
+      if (ex === 'sorpresa') elipse(g, cx, cy + 8, 1, 2, '#7a2c26'); else if (ex === 'preocupada') { rect(g, cx - 2, cy + 8, 4, 1, boca); px(g, cx - 3, cy + 9, boca); px(g, cx + 2, cy + 9, boca); } else rect(g, cx - 2, cy + 8, 4, 1, boca);
+    }
+    px(g, cx, cy + 4, p.pielD); px(g, cx + 1, cy + 5, p.pielD);
+  }
+
+  function fondoLateral(g, o) {
+    textura(g, 0, 0, W, 132, C.pared, C.paredL, C.paredD);
+    rect(g, 0, 130, W, 2, C.maderaDD);
+    for (let x = 0; x < W; x += 26) { rect(g, x, 132, 26, 30, C.madera); rect(g, x + 3, 136, 20, 22, C.maderaD); rect(g, x + 3, 136, 20, 1, C.maderaDD); }
+    rect(g, 0, 132, W, 1, C.maderaL);
+    for (let y = 162, f = 0; y < H; y += 6, f++) for (let x = -14, k = 0; x < W; x += 14, k++) rect(g, x + (f % 2 ? 7 : 0), y, 14, 6, (k + f) % 2 ? '#c6d3d8' : '#bdcbd1');
+    rect(g, 0, 162, W, 1, '#9fb0b6');
+    relojDigital(g, 18, 10, o.hora);
+    rect(g, 96, 14, 30, 34, C.maderaDD); rect(g, 98, 16, 26, 30, '#e9e2cf'); rect(g, 108, 21, 6, 20, '#a24b3c'); rect(g, 102, 28, 18, 6, '#a24b3c');
+    rect(g, 136, 20, 44, 26, C.maderaDD); rect(g, 138, 22, 40, 22, '#ebe5d3'); rect(g, 143, 27, 30, 1, '#9b9483'); rect(g, 145, 31, 26, 1, '#b8b19f'); disco(g, 171, 39, 3, '#b85b45');
+    // soporte de suero
+    rect(g, 196, 30, 2, 128, C.metalD); rect(g, 188, 28, 18, 2, C.metalD); rect(g, 188, 158, 18, 2, C.metalDD);
+    if (o.suero) { rect(g, 190, 32, 10, 16, '#d4e2e6'); rect(g, 190, 32, 10, 2, '#aac0c7'); linea(g, 195, 48, 195, 70, '#b5c9cf'); linea(g, 195, 70, 250, 84, '#b5c9cf'); }
+    // camilla vista de lado (≈80 % del ancho)
+    g.save(); g.translate(0, 12);
+    elipse(g, 160, 150, 132, 3, '#a9b8be');
+    rect(g, 44, 110, 4, 36, C.metalD); rect(g, 272, 110, 4, 36, C.metalD);
+    disco(g, 46, 148, 3, '#222'); disco(g, 274, 148, 3, '#222');
+    rect(g, 32, 108, 256, 4, C.metal); rect(g, 32, 111, 256, 1, C.metalD);
+    rect(g, 31, 97, 258, 12, C.metalDD); rect(g, 32, 98, 256, 10, '#e9eef0'); rect(g, 32, 98, 256, 2, '#f8fbfc'); rect(g, 32, 106, 256, 2, '#c9d5da');
+    elipse(g, 52, 94, 16, 4, '#d3dde1'); elipse(g, 52, 93, 15, 3, '#fbfdfe');
+    g.restore();
+  }
+
+  // Brazo del médico en primera persona: entra desde el borde inferior de la imagen
+  function brazoLateral(g, m, tipo) {
+    const [x, y] = m;
+    if (tipo === 'manguito') {
+      rect(g, x - 6, y - 5, 12, 11, '#2f4d6a'); rect(g, x - 6, y, 12, 1, '#4a6d8f');
+      linea(g, x, y + 6, x - 8, y + 40, '#333');
+      capsula(g, x - 36, H + 8, x - 12, y + 46, 6, BATA); elipse(g, x - 9, y + 44, 6, 5, MANO_MED); elipse(g, x - 8, y + 41, 3, 4, '#1c1c1c');
+      return;
+    }
+    capsula(g, x + 26, H + 10, x + 6, y + 10, 6, BATA);
+    rect(g, x + 2, y + 8, 9, 3, '#3fb6a8');
+    elipse(g, x + 3, y + 4, 6, 5, MANO_MED);
+    if (tipo === 'esteto') { disco(g, x, y, 4, '#c0c6cc'); disco(g, x, y, 2, '#8a939b'); linea(g, x + 3, y + 2, x + 40, H, '#3a3d40'); }
+  }
+
   // ------------------------------------------------------------ escena completa
   function escena(c, o) {
     const g = ctx(c);
@@ -511,9 +595,29 @@
       vineta(c);
       return;
     }
-    // box de examen: vista aérea de la camilla
-    fondoArriba(g, o);
     const pose = POSES[o.pose] || POSES.supino;
+    // sentada o de pie: vista lateral de la camilla
+    if (pose.vistaLateral) {
+      fondoLateral(g, o);
+      const fig = lienzo(W, H), fg = ctx(fig);
+      if (o.enfermera) { fg.save(); fg.translate(-84, 4); POSES.bipedestacion.dibujar(fg, { ...PAL_ENFERMERA, coleta: false, manoAbd: false, ojos: '#2b1b14', pantalon: '#594873', pantalonD: '#4a3b61' }, 'neutral'); fg.restore(); }
+      pose.dibujar(fg, o.pal, o.expr || 'neutral', o.variante);
+      contorno(fig, '#1d1410');
+      g.drawImage(fig, 0, 0);
+      if (o.accesorio && o.marca) {
+        const m = pose.marcas()[o.marca];
+        if (m) {
+          const capa = lienzo(W, H), cg = ctx(capa);
+          brazoLateral(cg, m, o.accesorio);
+          contorno(capa, '#1d1410');
+          g.drawImage(capa, 0, 0);
+        }
+      }
+      if (!o.sinVineta) vineta(c, 0.3);
+      return;
+    }
+    // acostada: vista aérea de la camilla
+    fondoArriba(g, o);
     const fig = lienzo(W, H), fg = ctx(fig);
     pose.dibujar(fg, o.pal, o.expr || 'neutral', o.variante);
     if (o.enfermera) enfermeraArriba(fg);
@@ -529,13 +633,13 @@
         g.drawImage(capa, 0, 0);
       }
     }
-    vineta(c, 0.22);
+    if (!o.sinVineta) vineta(c, 0.22);
   }
 
   // Miniatura (para los botones de posición): la escena completa a la mitad
   function miniatura(c, pose, pal, expr) {
     const tmp = lienzo(W, H);
-    escena(tmp, { lugar: 'box', pose, pal, expr });
+    escena(tmp, { lugar: 'box', pose, pal, expr, sinVineta: true });
     const g = ctx(c);
     g.clearRect(0, 0, c.width, c.height);
     g.drawImage(tmp, 0, 0, W, H, 0, 0, c.width, c.height);
